@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguimiento de Casos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0EDE8;
+  --surface: #FAFAF7;
+  --surface2: #EDEAE4;
+  --border: #D8D4CC;
+  --text: #1C1A17;
+  --text2: #6B6760;
+  --text3: #A09C96;
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  --teal: #0F7B6C;
+  --teal-bg: #E0F2EE;
+  --teal-mid: #14A896;
+  --coral: #C94F2C;
+  --coral-bg: #FDEEE9;
+  --amber: #B45309;
+  --amber-bg: #FEF3E2;
+  --violet: #5B3FD4;
+  --violet-bg: #EDE9FD;
+  --rose: #BE185D;
+  --rose-bg: #FCE7F3;
+  --sky: #0369A1;
+  --sky-bg: #E0F2FE;
+  --green: #166534;
+  --green-bg: #DCFCE7;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+.sidebar{background:var(--text);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.main{padding:28px 32px;overflow-y:auto;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar-logo{padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-logo h1{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:0.02em;}
+.sidebar-logo p{font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;}
+.sidebar-nav{padding:12px 10px;flex:1;}
+.nav-section{font-size:10px;font-weight:500;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:10px 10px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.55);font-size:13px;transition:all 0.12s;margin-bottom:1px;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
+.nav-item.active{background:rgba(255,255,255,0.12);color:#fff;font-weight:500;}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--teal-mid);color:#fff;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;min-width:20px;text-align:center;}
+.nav-badge.red{background:var(--coral);}
+.sidebar-drive{padding:14px 16px;border-top:1px solid rgba(255,255,255,0.08);}
+.drive-dot{width:7px;height:7px;border-radius:50%;background:#F59E0B;flex-shrink:0;}
+.drive-dot.ok{background:var(--teal-mid);}
+.drive-status{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.5);}
+.drive-info{font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px;}
+.sync-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--teal-mid);background:none;border:none;cursor:pointer;padding:6px 0;font-family:inherit;margin-top:6px;}
+.sync-btn:hover{opacity:0.75;}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
+.page-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text);letter-spacing:-0.5px;}
+.page-sub{font-size:13px;color:var(--text3);margin-top:4px;}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity 0.12s;}
+.btn-primary:hover{opacity:0.82;}
+.btn-primary.teal{background:var(--teal);}
+.btn-secondary{display:inline-flex;align-items:center;gap:7px;background:var(--surface);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.btn-secondary:hover{background:var(--surface2);}
+.btn-danger{display:inline-flex;align-items:center;gap:7px;background:var(--coral-bg);color:var(--coral);border:1px solid #F5C6C2;border-radius:var(--radius);padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{border-radius:var(--radius-lg);padding:18px 20px;position:relative;overflow:hidden;}
+.stat-card.s1{background:var(--teal);color:#fff;}
+.stat-card.s2{background:var(--violet);color:#fff;}
+.stat-card.s3{background:var(--amber);color:#fff;}
+.stat-card.s4{background:var(--coral);color:#fff;}
+.stat-label{font-size:11px;font-weight:500;opacity:0.7;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+.stat-value{font-family:'Syne',sans-serif;font-size:32px;font-weight:700;letter-spacing:-1px;}
+.stat-card::after{content:'';position:absolute;right:-10px;top:-10px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.08);}
+
+/* SEARCH */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-wrap{flex:1;min-width:200px;position:relative;}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);width:15px;height:15px;}
+.search-wrap input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:13px;font-family:inherit;color:var(--text);outline:none;}
+.search-wrap input:focus{border-color:var(--teal);}
+.filter-btn{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:12px;color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.12s;white-space:nowrap;}
+.filter-btn.active{background:var(--text);border-color:var(--text);color:#fff;}
+
+/* CASE CARDS */
+.cases-grid{display:flex;flex-direction:column;gap:10px;}
+.case-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:14px;}
+.case-card:hover{border-color:#B8B4AC;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.case-card.has-alert{border-left:3px solid var(--coral);}
+.avatar{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;}
+.av-teal{background:var(--teal-bg);color:var(--teal);}
+.av-violet{background:var(--violet-bg);color:var(--violet);}
+.av-amber{background:var(--amber-bg);color:var(--amber);}
+.av-rose{background:var(--rose-bg);color:var(--rose);}
+.av-sky{background:var(--sky-bg);color:var(--sky);}
+.case-info{flex:1;min-width:0;}
+.case-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text);}
+.case-meta{font-size:12px;color:var(--text3);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+.case-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+.badge-active{background:var(--teal-bg);color:var(--teal);}
+.badge-pending{background:var(--amber-bg);color:var(--amber);}
+.badge-resolved{background:var(--green-bg);color:var(--green);}
+.badge-closed{background:var(--surface2);color:var(--text2);}
+.badge-dir{background:var(--violet-bg);color:var(--violet);}
+
+/* DETAIL */
+.back-btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--border);border-radius:var(--radius);padding:7px 13px;font-size:13px;color:var(--text2);cursor:pointer;font-family:inherit;margin-bottom:20px;transition:all 0.12s;}
+.back-btn:hover{background:var(--surface2);}
+.detail-grid{display:grid;grid-template-columns:1fr 290px;gap:20px;}
+.detail-main{display:flex;flex-direction:column;gap:16px;}
+.detail-side{display:flex;flex-direction:column;gap:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.card-title svg{width:15px;height:15px;color:var(--text3);}
+.card-body{padding:16px 18px;}
+.person-header{display:flex;align-items:center;gap:16px;}
+.avatar-lg{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:700;flex-shrink:0;}
+.person-fullname{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.4px;}
+.person-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.info-field{background:var(--surface2);border-radius:8px;padding:10px 12px;}
+.info-field label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px;}
+.info-field span{font-size:13px;color:var(--text);}
+
+/* TIMELINE / GESTIONES */
+.gestion-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
+.gestion-item:last-child{border-bottom:none;}
+.g-dot-wrap{display:flex;flex-direction:column;align-items:center;width:26px;flex-shrink:0;}
+.g-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px;}
+.g-dot-done{background:var(--green);}
+.g-dot-upcoming{background:var(--teal-mid);}
+.g-dot-pending{background:var(--amber);}
+.g-line{width:1.5px;flex:1;background:var(--border);min-height:14px;margin-top:4px;}
+.g-body{flex:1;min-width:0;}
+.g-date{font-size:11px;color:var(--text3);font-family:monospace;margin-bottom:3px;}
+.g-title{font-size:14px;font-weight:500;color:var(--text);}
+.g-note{font-size:13px;color:var(--text2);margin-top:4px;line-height:1.5;}
+.g-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.g-tag{background:var(--surface2);color:var(--text2);font-size:11px;padding:2px 8px;border-radius:20px;}
+
+/* ACTORS */
+.actor-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.actor-item:last-child{border-bottom:none;}
+.actor-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;flex-shrink:0;}
+
+/* ALERTS */
+.alert-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
+.alert-card.urgent{border-left:3px solid var(--coral);}
+.alert-card.warn{border-left:3px solid var(--amber);}
+
+/* PENDIENTES */
+.pendiente-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all 0.12s;}
+.pendiente-card:hover{border-color:#B8B4AC;}
+.p-head{padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
+.p-steps{border-top:1px solid var(--border);padding:10px 16px;background:var(--surface2);}
+.step-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.step-item:last-child{border-bottom:none;}
+.progress-bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:var(--teal-mid);border-radius:4px;transition:width 0.3s;}
+
+/* DIRECTOR */
+.tema-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.tema-head{padding:14px 18px;display:flex;align-items:flex-start;gap:12px;}
+.tema-hist{border-top:1px solid var(--border);padding:12px 18px;background:var(--surface2);}
+.hist-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);}
+.hist-item:last-child{border-bottom:none;}
+
+/* MI DIA */
+.midia-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.12s;}
+.midia-item:hover{border-color:#B8B4AC;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+.midia-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.midia-section-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;padding:4px 2px;margin-top:4px;}
+.midia-section-label.red{color:var(--coral);}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.form-group label{font-size:12px;font-weight:500;color:var(--text2);}
+.form-group input,.form-group textarea,.form-group select{border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;width:100%;}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--teal);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.check-option{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--violet-bg);border-radius:var(--radius);margin-bottom:14px;cursor:pointer;}
+.check-option input{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--violet);}
+.check-option label{font-size:13px;color:var(--violet);cursor:pointer;font-weight:500;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;transform:translateY(10px);transition:transform 0.2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--radius);font-size:13px;display:flex;align-items:center;gap:9px;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast svg{color:var(--teal-mid);width:15px;height:15px;}
+
+/* LOCK */
+.lock-screen{position:fixed;inset:0;background:var(--text);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.lock-card{background:var(--surface);border-radius:20px;padding:40px;width:380px;max-width:95vw;text-align:center;}
+.lock-icon{width:56px;height:56px;background:var(--teal-bg);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.lock-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;}
+.lock-sub{font-size:13px;color:var(--text3);margin-bottom:24px;}
+.lock-input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:16px;font-family:inherit;text-align:center;letter-spacing:4px;outline:none;margin-bottom:8px;background:var(--surface);}
+.lock-input:focus{border-color:var(--teal);}
+.lock-error{font-size:12px;color:var(--coral);min-height:18px;margin-bottom:8px;}
+.lock-btn{width:100%;background:var(--teal);color:#fff;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;}
+.lock-hint{font-size:12px;color:var(--text3);margin-top:16px;line-height:1.6;}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:var(--text3);}
+.empty svg{width:40px;height:40px;margin-bottom:12px;opacity:0.35;}
+.empty p{font-size:14px;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .detail-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <div class="lock-title" id="lock-title">Seguimiento de casos</div>
+    <div class="lock-sub" id="lock-sub">Ingresá tu contraseña para acceder</div>
+    <input type="password" class="lock-input" id="lock-password" placeholder="••••••" onkeydown="if(event.key==='Enter')unlockApp()">
+    <div class="lock-error" id="lock-error"></div>
+    <button class="lock-btn" onclick="unlockApp()" id="lock-btn">Ingresar</button>
+    <div class="lock-hint" id="setup-hint" style="display:none;">Primera vez: creá una contraseña para cifrar tus datos.<br>Guardala — no se puede recuperar.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="main-app" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Seguimiento</h1>
+      <p>Gestión de casos</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item" onclick="navigate('midia')" id="nav-midia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Mi día
+        <span class="nav-badge" id="badge-midia" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" onclick="navigate('list')" id="nav-list">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Casos
+        <span class="nav-badge" id="badge-total">0</span>
+      </div>
+      <div class="nav-item" onclick="navigate('alerts')" id="nav-alerts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alertas
+        <span class="nav-badge red" id="badge-alerts" style="display:none;">0</span>
+      </div>
+      <div class="nav-section">Gestión</div>
+      <div class="nav-item" onclick="navigate('pendientes')" id="nav-pendientes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Pendientes
+        <span class="nav-badge" id="badge-pendientes" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" onclick="navigate('director')" id="nav-director">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Temas con la Dirección
+        <span class="nav-badge" id="badge-director" style="display:none;">0</span>
+      </div>
+      <div class="nav-section">Acciones</div>
+      <div class="nav-item" onclick="openNewCase()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        Nuevo caso
+      </div>
+    </nav>
+    <div class="sidebar-drive">
+      <div class="drive-status">
+        <div class="drive-dot" id="drive-dot"></div>
+        <span id="drive-label">Conectando…</span>
+      </div>
+      <div class="drive-info" id="drive-info">Verificando</div>
+      <button class="sync-btn" onclick="syncDrive()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- MI DÍA -->
+    <div id="view-midia" style="display:none;">
+      <div class="page-header">
+        <div><div class="page-title">Mi día</div><div class="page-sub" id="midia-sub">Todo lo pendiente</div></div>
+      </div>
+      <div id="midia-body"></div>
+    </div>
+
+    <!-- CASOS -->
+    <div id="view-list" style="display:none;">
+      <div class="page-header">
+        <div><div class="page-title">Casos</div><div class="page-sub" id="list-sub">—</div></div>
+        <button class="btn-primary" onclick="openNewCase()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo caso
+        </button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card s1"><div class="stat-label">Total</div><div class="stat-value" id="s-total">0</div></div>
+        <div class="stat-card s2"><div class="stat-label">En curso</div><div class="stat-value" id="s-active">0</div></div>
+        <div class="stat-card s3"><div class="stat-label">Pendiente</div><div class="stat-value" id="s-pending">0</div></div>
+        <div class="stat-card s4"><div class="stat-label">Con alerta</div><div class="stat-value" id="s-alerts-n">0</div></div>
+      </div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="search-input" placeholder="Buscar por nombre, DNI o unidad…" oninput="renderCases()">
+        </div>
+        <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">Todos</button>
+        <button class="filter-btn" id="filter-active" onclick="setFilter('active')">En curso</button>
+        <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">Pendiente</button>
+        <button class="filter-btn" id="filter-resolved" onclick="setFilter('resolved')">Resuelto</button>
+      </div>
+      <div class="cases-grid" id="cases-body"></div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div id="view-alerts" style="display:none;">
+      <div class="page-header"><div><div class="page-title">Alertas</div><div class="page-sub">Vencimientos y recordatorios</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;" id="alerts-body"></div>
+    </div>
+
+    <!-- DETAIL -->
+    <div id="view-detail" style="display:none;">
+      <button class="back-btn" onclick="navigate('list')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        Volver a casos
+      </button>
+      <div id="detail-content"></div>
+    </div>
+
+    <!-- PENDIENTES -->
+    <div id="view-pendientes" style="display:none;">
+      <div class="page-header">
+        <div><div class="page-title">Pendientes</div><div class="page-sub">Tareas generales</div></div>
+        <button class="btn-primary" onclick="openModal('modal-pendiente')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Nueva tarea
+        </button>
+      </div>
+      <div id="pendientes-body"></div>
+    </div>
+
+    <!-- DIRECTOR -->
+    <div id="view-director" style="display:none;">
+      <div class="page-header">
+        <div><div class="page-title">Temas con la Dirección</div><div class="page-sub">Seguimiento de temas institucionales</div></div>
+        <button class="btn-primary" onclick="openModal('modal-director-tema')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo tema
+        </button>
+      </div>
+      <div id="director-body"></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-new">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Nuevo caso</div><button class="modal-close" onclick="closeModal('modal-new')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre *</label><input id="f-name" type="text" placeholder="Nombre/s"></div>
+      <div class="form-group"><label>Apellido *</label><input id="f-apellido" type="text" placeholder="Apellido/s"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>DNI</label><input id="f-dni" type="text" placeholder="Ej: 29.111.222"></div>
+      <div class="form-group"><label>Unidad penitenciaria</label><input id="f-unidad" type="text" placeholder="Ej: UP 1, UP 9…"></div>
+    </div>
+    <div class="form-group"><label>Tipo de gestión *</label><input id="f-type" type="text" placeholder="Ej: Seguimiento médico, derivación, PAMI…"></div>
+    <div class="form-group"><label>Estado inicial</label><select id="f-status"><option value="active">En curso</option><option value="pending">Pendiente</option></select></div>
+    <div class="form-group"><label>Nota inicial</label><textarea id="f-note" placeholder="Contexto y descripción del caso…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-new')">Cancelar</button>
+      <button class="btn-primary" onclick="saveNewCase()">Crear caso</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-gestion">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Registrar gestión</div><button class="modal-close" onclick="closeModal('modal-gestion')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-group"><label>Título *</label><input id="g-title" type="text" placeholder="Ej: Turno médico, llamado, gestión autorización…"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Fecha *</label><input id="g-date" type="date"></div>
+      <div class="form-group"><label>Estado</label><select id="g-type"><option value="done">Realizada</option><option value="upcoming">Próxima</option><option value="pending">Pendiente</option></select></div>
+    </div>
+    <div class="form-group"><label>Actores involucrados (separados por coma)</label><input id="g-actors" type="text" placeholder="Ej: Dra. Romero, Asistencia Social PAMI"></div>
+    <div class="form-group"><label>Notas</label><textarea id="g-note" placeholder="Detalle, resultado, próximos pasos…"></textarea></div>
+    <div class="form-group"><label>Alerta de vencimiento (opcional)</label><input id="g-alert" type="date"></div>
+    <div class="check-option">
+      <input type="checkbox" id="g-direccion">
+      <label for="g-direccion">Llevar a Temas con la Dirección</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-gestion')">Cancelar</button>
+      <button class="btn-primary" onclick="saveGestion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-actor">
+  <div class="modal" style="width:360px;">
+    <div class="modal-head"><div class="modal-title">Agregar actor</div><button class="modal-close" onclick="closeModal('modal-actor')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-group"><label>Nombre *</label><input id="a-name" type="text" placeholder="Ej: Dra. Romero…"></div>
+    <div class="form-group"><label>Rol</label><input id="a-role" type="text" placeholder="Ej: Médica tratante…"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-actor')">Cancelar</button>
+      <button class="btn-primary" onclick="saveActor()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pendiente">
+  <div class="modal" style="width:440px;">
+    <div class="modal-head"><div class="modal-title">Nueva tarea</div><button class="modal-close" onclick="closeModal('modal-pendiente')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-group"><label>Título *</label><input id="p-title" type="text" placeholder="Ej: Llamar a PAMI, enviar documentación…"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Fecha límite</label><input id="p-date" type="date"></div>
+      <div class="form-group"><label>Prioridad</label><select id="p-priority"><option value="alta">Alta</option><option value="media" selected>Media</option><option value="baja">Baja</option></select></div>
+    </div>
+    <div class="form-group"><label>Notas</label><textarea id="p-note" placeholder="Detalles adicionales…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-pendiente')">Cancelar</button>
+      <button class="btn-primary" onclick="savePendiente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-step">
+  <div class="modal" style="width:380px;">
+    <div class="modal-head"><div class="modal-title">Agregar paso</div><button class="modal-close" onclick="closeModal('modal-step')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-group"><label>Descripción *</label><input id="s-title" type="text" placeholder="Ej: Presentar formulario, llamar…"></div>
+    <div class="form-group"><label>Fecha</label><input id="s-date" type="date"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-step')">Cancelar</button>
+      <button class="btn-primary" onclick="saveStep()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-director-tema">
+  <div class="modal" style="width:440px;">
+    <div class="modal-head"><div class="modal-title">Nuevo tema</div><button class="modal-close" onclick="closeModal('modal-director-tema')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-group"><label>Tema *</label><input id="dt-title" type="text" placeholder="Ej: Revisión protocolo, recursos…"></div>
+    <div class="form-group"><label>Contexto</label><textarea id="dt-note" placeholder="¿Qué querés plantear?"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-director-tema')">Cancelar</button>
+      <button class="btn-primary" onclick="saveDirectorTema()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-continuidad">
+  <div class="modal" style="width:440px;">
+    <div class="modal-head"><div class="modal-title">Agregar actualización</div><button class="modal-close" onclick="closeModal('modal-continuidad')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="form-group"><label>Actualización *</label><textarea id="cont-note" placeholder="¿Qué pasó o se definió?"></textarea></div>
+    <div class="form-group"><label>Nuevo estado</label><select id="cont-status"><option value="pendiente">Pendiente</option><option value="en_reunion">En reunión</option><option value="con_seguimiento">Con seguimiento</option><option value="resuelto">Resuelto</option></select></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-continuidad')">Cancelar</button>
+      <button class="btn-primary" onclick="saveContinuidad()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Guardado</span></div>
+
+<script>
+const GAPI_CLIENT_ID = '1092221153425-3qpjajp7aj15t7346ef40bl4ps68enu7.apps.googleusercontent.com';
+const FILE_NAME = 'seguimiento_casos.json';
+const COLORS = ['av-teal','av-violet','av-amber','av-rose','av-sky'];
+const ACTOR_COLORS = ['av-teal','av-violet','av-amber','av-rose'];
+
+let state = { cases:[], pendientes:[], directorTemas:[], driveFileId:null, isAuthenticated:false, currentFilter:'all', currentCaseId:null, currentDirectorId:null, currentView:'midia' };
+let cryptoKey = null, driveToken = null;
+
+const DEMO = [
+  { id:'c1', name:'María', apellido:'García', dni:'27.450.112', unidad:'UP 1', type:'Seguimiento PAMI', status:'active', color:'av-teal', createdAt:'2025-03-03',
+    actors:[{name:'Dra. Romero',role:'Médica tratante'},{name:'Asistencia Social PAMI',role:'Gestión autorización'}],
+    gestiones:[
+      {id:'g1',title:'Apertura del caso',date:'2025-03-03',type:'done',note:'Primera entrevista.',actors:[],alert:'',enDireccion:false},
+      {id:'g2',title:'Consulta médica',date:'2025-04-10',type:'done',note:'Derivación a especialista indicada.',actors:['Dra. Romero'],alert:'',enDireccion:false},
+      {id:'g3',title:'Gestión autorización PAMI',date:'2025-04-28',type:'pending',note:'Pendiente resolución.',actors:['Asistencia Social PAMI'],alert:'2025-05-20',enDireccion:false},
+      {id:'g4',title:'Turno con Dra. Romero',date:'2025-05-15',type:'upcoming',note:'Llevar autorización renovada.',actors:['Dra. Romero'],alert:'',enDireccion:false}
+    ]
+  },
+  { id:'c2', name:'Jorge', apellido:'Rodríguez', dni:'18.330.045', unidad:'UP 9', type:'Derivación hospital', status:'pending', color:'av-violet', createdAt:'2025-01-10',
+    actors:[{name:'Hospital Italiano',role:'Centro de derivación'},{name:'IOMA',role:'Cobertura'}],
+    gestiones:[
+      {id:'g5',title:'Apertura del caso',date:'2025-01-10',type:'done',note:'Requiere derivación urgente.',actors:[],alert:'',enDireccion:false},
+      {id:'g6',title:'Solicitud turno',date:'2025-03-15',type:'done',note:'Demora estimada 6 semanas.',actors:['Hospital Italiano'],alert:'',enDireccion:true}
+    ]
+  }
+];
+
+// ── CRYPTO ────────────────────────────────────────────────────────────────────
+async function deriveKey(password, salt) {
+  const enc = new TextEncoder();
+  const km = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'}, km, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']);
+}
+async function encryptData(data, key) {
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, enc.encode(JSON.stringify(data)));
+  const buf = new Uint8Array(iv.byteLength + encrypted.byteLength);
+  buf.set(iv,0); buf.set(new Uint8Array(encrypted), iv.byteLength);
+  return btoa(String.fromCharCode(...buf));
+}
+async function decryptData(b64, key) {
+  const buf = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const iv = buf.slice(0,12), data = buf.slice(12);
+  const dec = await crypto.subtle.decrypt({name:'AES-GCM',iv}, key, data);
+  return JSON.parse(new TextDecoder().decode(dec));
+}
+
+async function unlockApp() {
+  const pwd = document.getElementById('lock-password').value;
+  const errEl = document.getElementById('lock-error');
+  errEl.textContent = '';
+  if (!pwd || pwd.length < 4) { errEl.textContent = 'Mínimo 4 caracteres'; return; }
+  const stored = localStorage.getItem('casos_salt');
+  if (!stored) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    localStorage.setItem('casos_salt', btoa(String.fromCharCode(...salt)));
+    cryptoKey = await deriveKey(pwd, salt);
+    state.cases = DEMO; state.pendientes = []; state.directorTemas = [];
+    await saveLocal(); showApp();
+  } else {
+    const salt = Uint8Array.from(atob(stored), c => c.charCodeAt(0));
+    cryptoKey = await deriveKey(pwd, salt);
+    const saved = localStorage.getItem('casos_data');
+    if (!saved) { state.cases = DEMO; state.pendientes = []; state.directorTemas = []; showApp(); return; }
+    try {
+      const parsed = await decryptData(saved, cryptoKey);
+      state.cases = parsed.cases || DEMO;
+      state.pendientes = parsed.pendientes || [];
+      state.directorTemas = parsed.directorTemas || [];
+      state.driveFileId = parsed.driveFileId || null;
+      showApp();
+    } catch(e) {
+      cryptoKey = null;
+      errEl.textContent = 'Contraseña incorrecta.';
+      document.getElementById('lock-password').value = '';
+    }
+  }
+}
+
+function showApp() {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'grid';
+  initDrive(); updateStats(); renderCases(); setFilter('all'); navigate('midia');
+}
+
+window.onload = () => {
+  const hasSalt = localStorage.getItem('casos_salt');
+  if (!hasSalt) {
+    document.getElementById('setup-hint').style.display = 'block';
+    document.getElementById('lock-sub').textContent = 'Creá una contraseña para cifrar tus datos';
+    document.getElementById('lock-title').textContent = 'Bienvenida';
+    document.getElementById('lock-btn').textContent = 'Crear contraseña';
+  }
+  document.getElementById('lock-password').focus();
+};
+
+async function saveLocal() {
+  if (!cryptoKey) return;
+  try {
+    const enc = await encryptData({cases:state.cases,pendientes:state.pendientes,directorTemas:state.directorTemas,driveFileId:state.driveFileId}, cryptoKey);
+    localStorage.setItem('casos_data', enc);
+  } catch(e) { console.error(e); }
+}
+
+// ── DRIVE ─────────────────────────────────────────────────────────────────────
+function initDrive() {
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = () => setDriveStatus(false,'No conectado','Clic en Sincronizar');
+  s.onerror = () => setDriveStatus(false,'Sin conexión','Guardado localmente');
+  document.head.appendChild(s);
+}
+function setDriveStatus(ok,label,info) {
+  const dot = document.getElementById('drive-dot');
+  dot.className = 'drive-dot' + (ok?' ok':'');
+  document.getElementById('drive-label').textContent = label;
+  document.getElementById('drive-info').textContent = info;
+}
+function syncDrive() {
+  if (typeof google === 'undefined') { toast('Sin conexión a Drive'); return; }
+  if (driveToken) { saveToDrive(); return; }
+  google.accounts.oauth2.initTokenClient({
+    client_id: GAPI_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: (resp) => {
+      if (resp.error) { toast('No se pudo conectar'); return; }
+      driveToken = resp.access_token;
+      setDriveStatus(true,'Drive conectado','');
+      findOrCreateFile();
+    }
+  }).requestAccessToken();
+}
+async function findOrCreateFile() {
+  if (state.driveFileId) { saveToDrive(); return; }
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D'${FILE_NAME}'+and+trashed%3Dfalse&fields=files(id,name)`,{headers:{Authorization:`Bearer ${driveToken}`}});
+  const data = await res.json();
+  if (data.files && data.files.length > 0) { state.driveFileId = data.files[0].id; loadFromDrive(); } else { saveToDrive(); }
+}
+async function saveToDrive() {
+  if (!cryptoKey || !driveToken) return;
+  const encrypted = await encryptData({cases:state.cases,pendientes:state.pendientes,directorTemas:state.directorTemas}, cryptoKey);
+  const content = JSON.stringify({encrypted});
+  const boundary = '-------314159265358979323846';
+  const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({name:FILE_NAME,mimeType:'application/json'})}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${boundary}--`;
+  const method = state.driveFileId ? 'PATCH' : 'POST';
+  const url = state.driveFileId ? `https://www.googleapis.com/upload/drive/v3/files/${state.driveFileId}?uploadType=multipart` : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+  try {
+    const res = await fetch(url,{method,headers:{'Authorization':`Bearer ${driveToken}`,'Content-Type':`multipart/related; boundary="${boundary}"`},body});
+    const d = await res.json();
+    if (!state.driveFileId) state.driveFileId = d.id;
+    await saveLocal();
+    setDriveStatus(true,'Guardado en Drive','Hace un momento');
+    toast('Sincronizado con Drive ✓');
+  } catch(e) { await saveLocal(); toast('Guardado localmente'); }
+}
+async function loadFromDrive() {
+  try {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${state.driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${driveToken}`}});
+    const raw = await res.json();
+    let cases,pendientes,directorTemas;
+    if (raw.encrypted) {
+      const d = await decryptData(raw.encrypted, cryptoKey);
+      cases=d.cases; pendientes=d.pendientes||[]; directorTemas=d.directorTemas||[];
+    } else if (raw.cases) { cases=raw.cases; pendientes=raw.pendientes||[]; directorTemas=raw.directorTemas||[]; }
+    if (cases) { state.cases=cases; state.pendientes=pendientes; state.directorTemas=directorTemas; await saveLocal(); updateStats(); renderCases(); toast('Datos cargados desde Drive'); }
+  } catch(e) { toast('No se pudo leer Drive'); }
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function navigate(view) {
+  state.currentView = view;
+  ['midia','list','alerts','detail','pendientes','director'].forEach(v => {
+    document.getElementById('view-'+v).style.display = v===view ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-'+view);
+  if (navEl) navEl.classList.add('active');
+  if (view==='alerts') renderAlerts();
+  if (view==='list') renderCases();
+  if (view==='pendientes') renderPendientes();
+  if (view==='director') renderDirector();
+  if (view==='midia') renderMiDia();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const c = state.cases;
+  document.getElementById('s-total').textContent = c.length;
+  document.getElementById('s-active').textContent = c.filter(x=>x.status==='active').length;
+  document.getElementById('s-pending').textContent = c.filter(x=>x.status==='pending').length;
+  const al = c.filter(x=>hasAlert(x)).length;
+  document.getElementById('s-alerts-n').textContent = al;
+  document.getElementById('badge-total').textContent = c.length;
+  const ab = document.getElementById('badge-alerts');
+  ab.textContent = al; ab.style.display = al>0?'':'none';
+  document.getElementById('list-sub').textContent = `${c.length} caso${c.length!==1?'s':''} registrado${c.length!==1?'s':''}`;
+  const pend = state.pendientes.filter(p=>!p.done).length;
+  const pb = document.getElementById('badge-pendientes');
+  pb.textContent = pend; pb.style.display = pend>0?'':'none';
+  const dir = state.directorTemas.filter(t=>t.status!=='resuelto').length;
+  const db = document.getElementById('badge-director');
+  db.textContent = dir; db.style.display = dir>0?'':'none';
+}
+function hasAlert(c) { return (c.gestiones||[]).some(g=>g.alert&&new Date(g.alert)>=new Date(new Date().setHours(0,0,0,0))); }
+
+// ── FILTER & SEARCH ───────────────────────────────────────────────────────────
+function setFilter(f) {
+  state.currentFilter = f;
+  ['all','active','pending','resolved'].forEach(id => document.getElementById('filter-'+id).classList.toggle('active',id===f));
+  renderCases();
+}
+function getFiltered() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  return state.cases.filter(c => {
+    const matchF = state.currentFilter==='all'||c.status===state.currentFilter;
+    const full = ((c.name||'')+' '+(c.apellido||'')).toLowerCase();
+    const matchS = !q||full.includes(q)||(c.dni||'').includes(q)||(c.unidad||'').toLowerCase().includes(q)||(c.type||'').toLowerCase().includes(q);
+    return matchF && matchS;
+  });
+}
+
+// ── RENDER CASES ──────────────────────────────────────────────────────────────
+function renderCases() {
+  const cases = getFiltered();
+  const body = document.getElementById('cases-body');
+  if (!cases.length) { body.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><p>No hay casos que coincidan</p></div>'; return; }
+  body.innerHTML = cases.map(c => {
+    const upcoming = (c.gestiones||[]).filter(g=>g.type==='upcoming').sort((a,b)=>a.date.localeCompare(b.date))[0];
+    const last = (c.gestiones||[]).filter(g=>g.type==='done').sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const dateStr = upcoming ? `<span style="color:var(--teal);">Próx: ${formatDate(upcoming.date)}</span>` : last ? `Última: ${formatDate(last.date)}` : '—';
+    const alert = hasAlert(c);
+    const initials = ((c.name||'')[0]||'')+ ((c.apellido||'')[0]||'');
+    const statusMap = {active:'badge-active',pending:'badge-pending',resolved:'badge-resolved',closed:'badge-closed'};
+    const statusLabel = {active:'En curso',pending:'Pendiente',resolved:'Resuelto',closed:'Cerrado'};
+    return `<div class="case-card ${alert?'has-alert':''}" onclick="showDetail('${c.id}')">
+      <div class="avatar ${c.color}">${initials.toUpperCase()}</div>
+      <div class="case-info">
+        <div class="case-name">${c.name} ${c.apellido}</div>
+        <div class="case-meta">
+          ${c.dni?`<span>DNI ${c.dni}</span>`:''}
+          ${c.unidad?`<span>📍 ${c.unidad}</span>`:''}
+          <span>${c.type}</span>
+        </div>
+      </div>
+      <div class="case-right">
+        <span class="badge ${statusMap[c.status]||'badge-closed'}">${statusLabel[c.status]||'—'}</span>
+        <span style="font-size:11px;color:var(--text3);">${dateStr}</span>
+        ${alert?`<span style="font-size:11px;color:var(--coral);font-weight:500;">⚠ Alerta</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────────────
+function showDetail(id) {
+  state.currentCaseId = id;
+  const c = state.cases.find(x=>x.id===id);
+  if (!c) return;
+  navigate('detail');
+  const initials = (((c.name||'')[0]||'')+((c.apellido||'')[0]||'')).toUpperCase();
+  const statusMap = {active:'badge-active',pending:'badge-pending',resolved:'badge-resolved',closed:'badge-closed'};
+  const statusLabel = {active:'En curso',pending:'Pendiente',resolved:'Resuelto',closed:'Cerrado'};
+  const sorted = [...(c.gestiones||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-main">
+        <div class="card">
+          <div class="card-body">
+            <div class="person-header">
+              <div class="avatar-lg ${c.color}">${initials}</div>
+              <div style="flex:1;">
+                <div class="person-fullname">${c.name} ${c.apellido}</div>
+                <div class="person-tags">
+                  <span class="badge ${statusMap[c.status]||''}">${statusLabel[c.status]||'—'}</span>
+                  <span class="badge" style="background:var(--surface2);color:var(--text2);">${c.type}</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn-secondary" onclick="changeStatus('${c.id}')">Cambiar estado</button>
+                <button class="btn-danger" onclick="deleteCase('${c.id}')">Eliminar</button>
+              </div>
+            </div>
+            <div class="info-grid">
+              <div class="info-field"><label>DNI</label><span style="font-family:monospace;">${c.dni||'—'}</span></div>
+              <div class="info-field"><label>Unidad penitenciaria</label><span>${c.unidad||'—'}</span></div>
+              <div class="info-field"><label>Tipo de gestión</label><span>${c.type||'—'}</span></div>
+              <div class="info-field"><label>Caso iniciado</label><span>${formatDate(c.createdAt)}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Gestiones</div>
+            <button class="btn-primary teal" onclick="openGestion('${c.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Nueva gestión
+            </button>
+          </div>
+          <div class="card-body" style="padding:0 18px;">
+            ${!sorted.length ? '<div style="padding:16px 0;font-size:13px;color:var(--text3);">Sin gestiones registradas</div>' :
+              sorted.map((g,i)=>{
+                const dotClass = g.type==='done'?'g-dot-done':g.type==='upcoming'?'g-dot-upcoming':'g-dot-pending';
+                const isLast = i===sorted.length-1;
+                return `<div class="gestion-item">
+                  <div class="g-dot-wrap">
+                    <div class="g-dot ${dotClass}"></div>
+                    ${!isLast?'<div class="g-line"></div>':''}
+                  </div>
+                  <div class="g-body">
+                    <div class="g-date">${formatDate(g.date)}${g.type==='upcoming'?' · próxima':g.type==='pending'?' · pendiente':''}</div>
+                    <div class="g-title">${g.title}${g.enDireccion?` <span class="badge badge-dir" style="font-size:10px;">Dirección</span>`:''}</div>
+                    ${g.note?`<div class="g-note">${g.note}</div>`:''}
+                    ${g.actors&&g.actors.length?`<div class="g-tags">${g.actors.map(a=>`<span class="g-tag">${a}</span>`).join('')}</div>`:''}
+                    ${g.alert?`<div style="margin-top:6px;"><span class="badge" style="background:var(--amber-bg);color:var(--amber);font-size:10px;">⚠ Vence ${formatDate(g.alert)}</span></div>`:''}
+                  </div>
+                </div>`;
+              }).join('')
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-side">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Actores (${(c.actors||[]).length})</div>
+            <button class="btn-secondary" style="padding:5px 10px;font-size:12px;" onclick="openActor('${c.id}')">+ Agregar</button>
+          </div>
+          <div class="card-body">
+            ${!(c.actors||[]).length ? '<div style="font-size:13px;color:var(--text3);">Sin actores</div>' :
+              c.actors.map((a,i)=>`<div class="actor-item">
+                <div class="actor-av ${ACTOR_COLORS[i%ACTOR_COLORS.length]}">${a.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+                <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${a.name}</div><div style="font-size:11px;color:var(--text3);">${a.role||'Sin rol'}</div></div>
+                <button onclick="removeActor('${c.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>`).join('')
+            }
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alertas</div></div>
+          <div class="card-body">
+            ${!(c.gestiones||[]).filter(g=>g.alert).length ? '<div style="font-size:13px;color:var(--text3);">Sin alertas</div>' :
+              c.gestiones.filter(g=>g.alert).map(g=>`<div class="alert-item" style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div style="width:28px;height:28px;border-radius:8px;background:var(--amber-bg);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </div>
+                <div><div style="font-size:13px;font-weight:500;">${g.title}</div><div style="font-size:11px;color:var(--text3);">Vence: ${formatDate(g.alert)}</div></div>
+              </div>`).join('')
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── ALERTS PAGE ───────────────────────────────────────────────────────────────
+function renderAlerts() {
+  const alerts = [];
+  state.cases.forEach(c => (c.gestiones||[]).filter(g=>g.alert).forEach(g=>alerts.push({case:c,gestion:g,date:new Date(g.alert)})));
+  alerts.sort((a,b)=>a.date-b.date);
+  const body = document.getElementById('alerts-body');
+  const today = new Date(); today.setHours(0,0,0,0);
+  if (!alerts.length) { body.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><p>Sin alertas activas</p></div>'; return; }
+  body.innerHTML = alerts.map(({case:c,gestion:g,date})=>{
+    const urgent = date <= today;
+    return `<div class="alert-card ${urgent?'urgent':'warn'}" onclick="showDetail('${c.id}')">
+      <div style="width:36px;height:36px;border-radius:10px;background:${urgent?'var(--coral-bg)':'var(--amber-bg)'};color:${urgent?'var(--coral)':'var(--amber)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:500;">${g.title}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${c.name} ${c.apellido} · ${c.type}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:monospace;">Vence: ${formatDate(g.alert)} ${urgent?'<span style="color:var(--coral);font-weight:600;">· Vencido</span>':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CRUD ──────────────────────────────────────────────────────────────────────
+function openNewCase() { openModal('modal-new'); }
+function saveNewCase() {
+  const name = document.getElementById('f-name').value.trim();
+  const apellido = document.getElementById('f-apellido').value.trim();
+  const type = document.getElementById('f-type').value.trim();
+  if (!name||!apellido||!type) { toast('Completá nombre, apellido y tipo'); return; }
+  const newCase = {
+    id:'c'+Date.now(), name, apellido, dni:document.getElementById('f-dni').value.trim(),
+    unidad:document.getElementById('f-unidad').value.trim(), type,
+    status:document.getElementById('f-status').value,
+    color:COLORS[state.cases.length%COLORS.length],
+    createdAt:new Date().toISOString().slice(0,10), actors:[],
+    gestiones:[{id:'g'+Date.now(),title:'Apertura del caso',date:new Date().toISOString().slice(0,10),type:'done',note:document.getElementById('f-note').value.trim(),actors:[],alert:'',enDireccion:false}]
+  };
+  state.cases.unshift(newCase);
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-new');
+  ['f-name','f-apellido','f-dni','f-unidad','f-type','f-note'].forEach(id=>document.getElementById(id).value='');
+  updateStats(); renderCases();
+  toast('Caso creado');
+}
+
+let gestionCaseId = null;
+function openGestion(caseId) { gestionCaseId=caseId; document.getElementById('g-date').value=new Date().toISOString().slice(0,10); document.getElementById('g-direccion').checked=false; openModal('modal-gestion'); }
+function saveGestion() {
+  const title = document.getElementById('g-title').value.trim();
+  const date = document.getElementById('g-date').value;
+  if (!title||!date) { toast('Completá título y fecha'); return; }
+  const c = state.cases.find(x=>x.id===gestionCaseId);
+  if (!c) return;
+  const actors = document.getElementById('g-actors').value.split(',').map(a=>a.trim()).filter(Boolean);
+  const enDireccion = document.getElementById('g-direccion').checked;
+  c.gestiones.push({id:'g'+Date.now(),title,date,type:document.getElementById('g-type').value,note:document.getElementById('g-note').value.trim(),actors,alert:document.getElementById('g-alert').value,enDireccion});
+  if (enDireccion) state.directorTemas.unshift({id:'d'+Date.now(),title,note:`Vinculado al caso: ${c.name} ${c.apellido}`,status:'pendiente',historial:[]});
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-gestion');
+  ['g-title','g-actors','g-note','g-alert'].forEach(id=>document.getElementById(id).value='');
+  showDetail(gestionCaseId); updateStats();
+  toast(enDireccion?'Gestión registrada y enviada a Dirección':'Gestión registrada');
+}
+
+let actorCaseId = null;
+function openActor(caseId) { actorCaseId=caseId; openModal('modal-actor'); }
+function saveActor() {
+  const name = document.getElementById('a-name').value.trim();
+  if (!name) { toast('Ingresá un nombre'); return; }
+  const c = state.cases.find(x=>x.id===actorCaseId);
+  if (!c) return;
+  c.actors.push({name,role:document.getElementById('a-role').value.trim()});
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-actor');
+  ['a-name','a-role'].forEach(id=>document.getElementById(id).value='');
+  showDetail(actorCaseId); toast('Actor agregado');
+}
+function removeActor(caseId,idx) {
+  const c = state.cases.find(x=>x.id===caseId);
+  if (c) { c.actors.splice(idx,1); saveLocal().then(()=>syncDrive()); showDetail(caseId); toast('Actor eliminado'); }
+}
+function changeStatus(caseId) {
+  const c = state.cases.find(x=>x.id===caseId);
+  if (!c) return;
+  const statuses=['active','pending','resolved','closed'];
+  const labels={active:'En curso',pending:'Pendiente',resolved:'Resuelto',closed:'Cerrado'};
+  c.status = statuses[(statuses.indexOf(c.status)+1)%statuses.length];
+  saveLocal().then(()=>syncDrive()); showDetail(caseId); updateStats();
+  toast(`Estado: ${labels[c.status]}`);
+}
+function deleteCase(caseId) {
+  if (!confirm('¿Eliminar este caso?')) return;
+  state.cases = state.cases.filter(c=>c.id!==caseId);
+  saveLocal().then(()=>syncDrive()); navigate('list'); updateStats(); renderCases();
+  toast('Caso eliminado');
+}
+
+// ── PENDIENTES ────────────────────────────────────────────────────────────────
+const PRIORITY_LABEL={alta:'Alta',media:'Media',baja:'Baja'};
+const PRIORITY_STYLE={alta:`background:var(--coral-bg);color:var(--coral);`,media:`background:var(--amber-bg);color:var(--amber);`,baja:`background:var(--teal-bg);color:var(--teal);`};
+
+function renderPendientes() {
+  const body = document.getElementById('pendientes-body');
+  const pending = state.pendientes.filter(p=>!p.done);
+  const done = state.pendientes.filter(p=>p.done);
+  updateStats();
+  if (!state.pendientes.length) { body.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/></svg><p>Sin tareas pendientes</p></div>'; return; }
+  const renderItem = (p) => {
+    const steps=p.steps||[];
+    const doneS=steps.filter(s=>s.done).length;
+    const pct=steps.length?Math.round((doneS/steps.length)*100):0;
+    return `<div class="pendiente-card">
+      <div class="p-head">
+        <input type="checkbox" ${p.done?'checked':''} onchange="togglePendiente('${p.id}')" style="margin-top:3px;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--teal);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:500;color:var(--text);${p.done?'text-decoration:line-through;':''}"> ${p.title}</div>
+          ${p.note?`<div style="font-size:13px;color:var(--text2);margin-top:3px;">${p.note}</div>`:''}
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+            <span class="badge" style="${PRIORITY_STYLE[p.priority]}">${PRIORITY_LABEL[p.priority]}</span>
+            ${p.date?`<span style="font-size:11px;color:var(--text3);font-family:monospace;">Vence: ${formatDate(p.date)}</span>`:''}
+            ${steps.length?`<span style="font-size:11px;color:var(--text3);">${doneS}/${steps.length} pasos</span>`:''}
+          </div>
+          ${steps.length?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>`:''}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button onclick="openAddStep('${p.id}')" class="btn-secondary" style="padding:5px 9px;font-size:12px;">+ Paso</button>
+          <button onclick="deletePendiente('${p.id}')" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      ${steps.length?`<div class="p-steps">
+        ${steps.map((s,i)=>`<div class="step-item">
+          <input type="checkbox" ${s.done?'checked':''} onchange="toggleStep('${p.id}',${i})" style="width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:var(--teal);">
+          <div style="flex:1;font-size:13px;color:var(--text);${s.done?'text-decoration:line-through;color:var(--text3);':''}">${s.title}</div>
+          ${s.date?`<span style="font-size:11px;color:var(--text3);font-family:monospace;white-space:nowrap;">${formatDate(s.date)}</span>`:''}
+          <button onclick="deleteStep('${p.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`;
+  };
+  body.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;">
+    ${pending.map(renderItem).join('')}
+    ${done.length?`<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-top:8px;">Completadas</div>${done.map(renderItem).join('')}`:''}
+  </div>`;
+}
+function savePendiente() {
+  const title=document.getElementById('p-title').value.trim();
+  if (!title) { toast('Ingresá un título'); return; }
+  state.pendientes.unshift({id:'p'+Date.now(),title,done:false,steps:[],date:document.getElementById('p-date').value,priority:document.getElementById('p-priority').value,note:document.getElementById('p-note').value.trim()});
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-pendiente');
+  ['p-title','p-date','p-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-priority').value='media';
+  renderPendientes(); toast('Tarea guardada');
+}
+function togglePendiente(id) { const p=state.pendientes.find(x=>x.id===id); if(p){p.done=!p.done;saveLocal().then(()=>syncDrive());renderPendientes();} }
+function deletePendiente(id) { state.pendientes=state.pendientes.filter(x=>x.id!==id);saveLocal().then(()=>syncDrive());renderPendientes();toast('Eliminada'); }
+
+let stepPendienteId=null;
+function openAddStep(id){stepPendienteId=id;openModal('modal-step');}
+function saveStep(){
+  const title=document.getElementById('s-title').value.trim();
+  if(!title){toast('Ingresá descripción');return;}
+  const p=state.pendientes.find(x=>x.id===stepPendienteId);
+  if(!p)return;
+  if(!p.steps)p.steps=[];
+  p.steps.push({title,date:document.getElementById('s-date').value,done:false});
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-step');
+  ['s-title','s-date'].forEach(id=>document.getElementById(id).value='');
+  renderPendientes();toast('Paso agregado');
+}
+function toggleStep(pid,i){const p=state.pendientes.find(x=>x.id===pid);if(p&&p.steps[i]!==undefined){p.steps[i].done=!p.steps[i].done;saveLocal().then(()=>syncDrive());renderPendientes();}}
+function deleteStep(pid,i){const p=state.pendientes.find(x=>x.id===pid);if(p){p.steps.splice(i,1);saveLocal().then(()=>syncDrive());renderPendientes();}}
+
+const DIR_STATUS_LABEL={pendiente:'Pendiente',en_reunion:'En reunión',con_seguimiento:'Con seguimiento',resuelto:'Resuelto'};
+const DIR_STATUS_STYLE={pendiente:`background:var(--amber-bg);color:var(--amber);`,en_reunion:`background:var(--teal-bg);color:var(--teal);`,con_seguimiento:`background:var(--violet-bg);color:var(--violet);`,resuelto:`background:var(--green-bg);color:var(--green);`};
+function renderDirector(){
+  const body=document.getElementById('director-body');
+  if(!state.directorTemas.length){body.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>Sin temas registrados</p></div>';return;}
+  body.innerHTML='<div style="display:flex;flex-direction:column;gap:12px;">'+state.directorTemas.map(t=>`
+    <div class="tema-card">
+      <div class="tema-head">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+            <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text);">${t.title}</span>
+            <span class="badge" style="${DIR_STATUS_STYLE[t.status]}">${DIR_STATUS_LABEL[t.status]}</span>
+          </div>
+          ${t.note?`<div style="font-size:13px;color:var(--text2);">${t.note}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button onclick="openContinuidad('${t.id}')" class="btn-secondary" style="padding:5px 10px;font-size:12px;">+ Actualizar</button>
+          <button onclick="deleteDirectorTema('${t.id}')" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      ${t.historial&&t.historial.length?`<div class="tema-hist">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Historial</div>
+        ${t.historial.map(h=>`<div class="hist-item">
+          <span style="font-size:11px;color:var(--text3);font-family:monospace;white-space:nowrap;margin-top:2px;">${formatDate(h.date)}</span>
+          <div><span class="badge" style="${DIR_STATUS_STYLE[h.status]};margin-right:6px;">${DIR_STATUS_LABEL[h.status]}</span><span style="font-size:13px;color:var(--text2);">${h.note}</span></div>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`).join('')+'</div>';
+  updateStats();
+}
+function saveDirectorTema(){
+  const title=document.getElementById('dt-title').value.trim();
+  if(!title){toast('Ingresá un título');return;}
+  state.directorTemas.unshift({id:'d'+Date.now(),title,status:'pendiente',note:document.getElementById('dt-note').value.trim(),historial:[]});
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-director-tema');
+  ['dt-title','dt-note'].forEach(id=>document.getElementById(id).value='');
+  renderDirector();toast('Tema guardado');
+}
+let continuidadId=null;
+function openContinuidad(id){continuidadId=id;openModal('modal-continuidad');}
+function saveContinuidad(){
+  const note=document.getElementById('cont-note').value.trim();
+  if(!note){toast('Ingresá una actualización');return;}
+  const t=state.directorTemas.find(x=>x.id===continuidadId);
+  if(!t)return;
+  const s=document.getElementById('cont-status').value;
+  t.status=s;
+  t.historial.unshift({date:new Date().toISOString().slice(0,10),note,status:s});
+  saveLocal().then(()=>syncDrive());
+  closeModal('modal-continuidad');
+  document.getElementById('cont-note').value='';
+  renderDirector();toast('Actualización guardada');
+}
+function deleteDirectorTema(id){
+  if(!confirm('¿Eliminar este tema?'))return;
+  state.directorTemas=state.directorTemas.filter(x=>x.id!==id);
+  saveLocal().then(()=>syncDrive());renderDirector();toast('Tema eliminado');
+}
+
+function renderMiDia(){
+  const body=document.getElementById('midia-body');
+  const today=new Date();today.setHours(0,0,0,0);
+  const items=[];
+  state.cases.forEach(c=>{
+    (c.gestiones||[]).filter(g=>g.type==='upcoming'||g.type==='pending').forEach(g=>{
+      items.push({type:'gestion',title:g.title,date:g.date||'',ref:c.name+' '+c.apellido,caseId:c.id});
+    });
+  });
+  state.pendientes.forEach(p=>{
+    if(!p.done){
+      if(!p.steps||!p.steps.length){
+        items.push({type:'pendiente',title:p.title,date:p.date||'',ref:'Tarea general'});
+      } else {
+        (p.steps||[]).filter(s=>!s.done).forEach(s=>{
+          items.push({type:'step',title:s.title,date:s.date||'',ref:p.title});
+        });
+      }
+    }
+  });
+  items.sort((a,b)=>{if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;return a.date.localeCompare(b.date);});
+  const overdue=items.filter(i=>i.date&&new Date(i.date)<today);
+  const pending=items.filter(i=>!i.date||new Date(i.date)>=today);
+  const badge=document.getElementById('badge-midia');
+  badge.textContent=items.length;badge.style.display=items.length>0?'':'none';
+  document.getElementById('midia-sub').textContent=`${items.length} pendiente${items.length!==1?'s':''} en total`;
+  if(!items.length){body.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><p>Todo al día</p></div>';return;}
+  const typeColor={gestion:'var(--teal-bg)',step:'var(--amber-bg)',pendiente:'var(--violet-bg)'};
+  const typeText={gestion:'var(--teal)',step:'var(--amber)',pendiente:'var(--violet)'};
+  const typeLabel={gestion:'Gestión de caso',step:'Paso de tarea',pendiente:'Tarea general'};
+  const typeIcon={
+    gestion:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    step:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>`,
+    pendiente:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 8h6"/></svg>`
+  };
+  const renderItem=item=>`
+    <div class="midia-item" onclick="${item.caseId?`showDetail('${item.caseId}')`:``}">
+      <div class="midia-icon" style="background:${typeColor[item.type]};color:${typeText[item.type]};">${typeIcon[item.type]}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;display:flex;gap:8px;align-items:center;">
+          <span style="background:${typeColor[item.type]};color:${typeText[item.type]};padding:1px 7px;border-radius:20px;font-size:10px;font-weight:500;">${typeLabel[item.type]}</span>
+          <span>${item.ref}</span>
+        </div>
+      </div>
+      ${item.date?`<span style="font-size:11px;color:var(--text3);font-family:monospace;white-space:nowrap;flex-shrink:0;">${formatDate(item.date)}</span>`:''}
+    </div>`;
+  body.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;">
+    ${overdue.length?`<div class="midia-section-label red">Vencidos</div>${overdue.map(renderItem).join('')}<div style="height:6px;"></div>`:''}
+    ${pending.length?`${overdue.length?'<div class="midia-section-label">Próximos</div>':''}${pending.map(renderItem).join('')}`:''}
+  </div>`;
+}
+
+function formatDate(d){if(!d)return'—';const[y,m,day]=d.split('-');const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+document.querySelectorAll('.modal-overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
+</script>
+</body>
+</html>
